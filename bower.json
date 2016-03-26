@@ -4,6 +4,6 @@
   "main": "eweixin.js",
   "ignore": [],
   "dependencies": {
-    "jweixin-bower": "git@github.com:ETENG-OSP/jweixin-bower.git#^1.0.0"
+    "jweixin": "https://github.com/EthanZhong/jweixin.git"
   }
 }

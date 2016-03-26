@@ -1,10 +1,9 @@
 ;(function(global,factory){
 	if(typeof global !=='undefined'&&global.document&&global.self===global.top){
 		if(typeof define==='function'&&define.amd){
-			define(['./jweixin-1.0.0'],function(wx){return factory(wx,global,global.document);});
+			define(['jweixin'],function(wx){return factory(wx,global,global.document);});
 		}else if(typeof module !== 'undefined' && module.exports){
-			var wx=require('./jweixin-1.0.0');
-			module.exports = factory(wx,global,global.document);
+			module.exports = factory(require('jweixin'),global,global.document);
 		}else{
 			global.eweixin=factory(global.wx,global,global.document);
 		}
