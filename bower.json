@@ -1,0 +1,9 @@
+{
+  "name": "eweixin",
+  "version": "1.0.0",
+  "main": "eweixin.js",
+  "ignore": [],
+  "dependencies": {
+    "jweixin-bower": "git@github.com:ETENG-OSP/jweixin-bower.git#^1.0.0"
+  }
+}
