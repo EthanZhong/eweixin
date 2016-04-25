@@ -2,8 +2,10 @@
   "name": "eweixin",
   "version": "1.0.0",
   "main": "eweixin.js",
-  "ignore": [],
+  "ignore": [
+    "*.html"
+  ],
   "dependencies": {
-    "jweixin": "https://github.com/EthanZhong/jweixin.git"
+    "jweixin": "ethanzhong/jweixin#^1.0.0"
   }
 }

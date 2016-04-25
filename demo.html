@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>Demo</title>
+	<script type="text/javascript" src="bower_components/jweixin/jweixin-1.0.0.js"></script>
+	<script type="text/javascript" src="eweixin.js"></script>
+</head>
+<body>
+	<button id="scanQRCode">scanQRCode</button>
+	<button id="openProductSpecificView">openProductSpecificView</button>
+	<button id="openLocation">openLocation</button>
+	<button id="getLocation">getLocation</button>
+	<button id="previewImage">previewImage</button>
+	<button id="chooseImage">chooseImage</button>
+	<script type="text/javascript">
+		//eweixin.closeWindow()
+		document.querySelector('#scanQRCode').onclick=function(){
+			eweixin.scanQRCode();
+		}
+		document.querySelector('#openProductSpecificView').onclick=function(){
+			eweixin.openProductSpecificView({productId: 'pDF3iY_m2M7EQ5EKKKWd95kAxfNw'});
+		}
+		document.querySelector('#openLocation').onclick=function(){
+			eweixin.openLocation({
+			   	latitude: 23.099994,
+			   	longitude: 113.324520,
+			   	name: 'TIT 创意园',
+			   	address: '广州市海珠区新港中路 397 号',
+			   	scale: 14,
+			   	infoUrl: 'http://weixin.qq.com'
+		    });
+		}
+		document.querySelector('#getLocation').onclick=function(){
+			eweixin.getLocation();
+		}
+		document.querySelector('#previewImage').onclick = function () {
+		    eweixin.previewImage({
+			    current: 'http://img5.douban.com/view/photo/photo/public/p1353993776.jpg',
+			    urls: [
+			        'http://img3.douban.com/view/photo/photo/public/p2152117150.jpg',
+			        'http://img5.douban.com/view/photo/photo/public/p1353993776.jpg',
+			        'http://img3.douban.com/view/photo/photo/public/p2152134700.jpg'
+			    ]
+		    });
+		};
+		document.querySelector('#chooseImage').onclick=function(){
+			eweixin.chooseImage({count:2});
+		}
+	</script>
+</body>
+</html>
