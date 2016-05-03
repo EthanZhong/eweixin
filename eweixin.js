@@ -12,7 +12,7 @@
 	}else{
 		throw new Error( 'eweixin requires a window with a document and window.self must be equal to window.top' );
 	}
-})(typeof window !== 'undefined' ? window : this,function(global,wx){
+})(typeof window!=='undefined'?window:this,function(global,wx){
   	/*判断是否是数组*/
   	var isArray=function(value){
 		if(Array.isArray){
@@ -47,8 +47,8 @@
   	}
   	/*判断是否是微信内置浏览器*/
   	var isWechat=(global.navigator.userAgent.toLowerCase().match(/microMessenger/i)=='micromessenger');
-  	/*是否需要 config*/
-  	var needConfig=true;
+  	/*判断是否是腾讯域名*/
+  	var isQQdomain=/\.qq\.com/g.test(global.location.host);
   	/*是否已经 config*/
   	var hasConfig=false;
   	/**
@@ -98,6 +98,11 @@
 	];
   	/*所有接口以及调用需求*/
   	var apiList={
+		onMenuShareAppMessage:	(isQQdomain)?'bridge':'config',
+      	onMenuShareTimeline:	(isQQdomain)?'bridge':'config',
+		onMenuShareQQ:			(isQQdomain)?'bridge':'config',
+		onMenuShareWeibo:		(isQQdomain)?'bridge':'config',
+		onMenuShareQZone:		(isQQdomain)?'bridge':'config',
   		checkJsApi:				'bridge',
 		previewImage:			'bridge',
 		getNetworkType:			'bridge',
@@ -106,11 +111,6 @@
 		closeWindow:			'bridge',
 		openProductSpecificView:'bridge',
 		addCard:				'bridge',
-		onMenuShareAppMessage:	'config',
-      	onMenuShareTimeline:	'config',
-		onMenuShareQQ:			'config',
-		onMenuShareWeibo:		'config',
-		onMenuShareQZone:		'config',
 		startRecord:			'config',
 		stopRecord:				'config',
 		onVoiceRecordEnd:		'config',
@@ -153,7 +153,6 @@
 	var QZinfo={};
   	/*eweixin 对象*/
 	var eweixin={
-		version:'1.0.0',
 		/*分享平台*/
 		platforms:{
 	  		AM:'appmessage',
@@ -169,6 +168,12 @@
 			return isWechat;
 		}
 	});
+	/*是否是腾讯域名*/
+	Object.defineProperty(eweixin,'isQQdomain',{
+		get:function(){
+			return isQQdomain;
+		}
+	});
 	/*WeixinJSBridge 是否链接*/
 	Object.defineProperty(eweixin,'isBridge',{
 		get:function(){
@@ -178,10 +183,10 @@
 	/*是否完成配置验证*/
 	Object.defineProperty(eweixin,'isConfig',{
 		get:function(){
-			return !!(hasConfig||!needConfig);
+			return hasConfig;
 		}
 	});
-	/*对 `wx` 的接口进行包裹处理*/
+	/*对 `wx` 的所有接口进行包裹处理*/
 	for(var i in apiList){
 		apiNams.push(i);
 		/**
@@ -207,11 +212,11 @@
      */
 	eweixin.config=function(configs,success,fail){
 		if(hasConfig){
-			isFunction(success)&&success({'errMsg':'config:has already config'});
+			isFunction(success)&&success({'errMsg':'config:ok has already config'});
 		}else if(!isObject(configs)){
 			isFunction(fail)&&fail({'errMsg':'config:invalid configs args'});
 		}else{
-			/*经过测试发现 config 验证发出后 会按照 wx.error wx.ready 添加的顺序执行 所以把 wx.error 放第一位 如果验证成功不会执行 wx.error */
+			/*经过测试发现 config 验证发出后 会按照 `wx.error`  `wx.ready` 添加的顺序执行 所以把 wx.error 放第一位 如果验证成功不会执行 wx.error */
 			var isError=false;
 			wx.error(function(msg){
 				isError=true;
@@ -253,7 +258,8 @@
 	 * 	```
 	 */
 	eweixin.checkJsApi=wrapperMethod('checkJsApi',{
-		jsApiList:apiNams
+		jsApiList:apiNams,
+		success:function(res){}
 	});
 	/**
 	 *批量隐藏功能按钮
@@ -263,7 +269,8 @@
 	 *@retrun eweixin
 	 */
 	eweixin.hideMenuItems=wrapperMethod('hideMenuItems',{
-		menuList:menuList
+		menuList:menuList,
+		success:function(res){}
 	});
 	/**
 	 *批量显示功能按钮
@@ -273,237 +280,169 @@
 	 *@retrun eweixin
 	 */
 	eweixin.showMenuItems=wrapperMethod('showMenuItems',{
-		menuList:menuList
+		menuList:menuList,
+		success:function(res){}
 	});
 	/**
-	 *微信好友分享内容修改
-	 *@params key   string 需要改变的参数名 title/link/imgUrl等 如果传入 'clear' 则清空所有的内容参数
-	 *@params value string 对应key的值
+	 *微信好友分享修改
+	 *@params key   	string 		需要改变的参数名  如果传入 'clear' 则清空所有参数
+	 *@params value 	* 			对应 key 的值     如果传入空值则清空对应的参数
 	 *@return eweixin
 	 */
 	eweixin.appmessageChangeContent=function(key,value){
-		if(key==='clear'){
-			empty(appmessageContentsRecord);
-		}else if(!isUndefined(key)){
-			appmessageContentsRecord[key]=value;
-		}
-		return this.onMenuShareAppMessage(copy({},appmessageContentsRecord),copy({},appmessageCallbacksRecord));
+		return this.onMenuShareAppMessage(changeInfo(AMinfo,shareKeyNames,key,value));
 	}
-	/**
-	 *微信好友分享回调修改
-	 *@params key   string 需要改变的参数名 success/cancel/等 如果传入 'clear' 则清空所有的回调参数
-	 *@params function 对应key的回调函数
-	 *@return eweixin
-	 */
 	eweixin.appmessageChangeCallback=function(key,value){
-		if(key==='clear'){
-			empty(appmessageCallbacksRecord);
-		}else if(!isUndefined(key)){
-			appmessageCallbacksRecord[key]=value;
-		}
-		return this.onMenuShareAppMessage(copy({},appmessageContentsRecord),copy({},appmessageCallbacksRecord));
+		return this.onMenuShareAppMessage(changeInfo(AMinfo,callBackNames,key,value));
 	}
 	/**
-	 *微信朋友圈分享内容修改
-	 *@params key   string 需要改变的参数名 title/link/imgUrl等 如果传入 'clear' 则清空所有的内容参数
-	 *@params value string 对应key的值
+	 *微信朋友圈分享修改
+	 *@params key   	string 		需要改变的参数名  	如果传入 'clear' 则清空所有参数
+	 *@params value 	* 			对应 key 的值		如果传入空值则清空对应的参数
 	 *@retrun eweixin
 	 */
 	eweixin.timelineChangeContent=function(key,value){
-		if(key==='clear'){
-			empty(timelineContentsRecord);
-		}else if(!isUndefined(key)){
-			timelineContentsRecord[key]=value;
-		}
-		return this.onMenuShareTimeline(copy({},timelineContentsRecord),copy({},timelineCallbacksRecord));
+		return this.onMenuShareTimeline(changeInfo(TLinfo,shareKeyNames,key,value));
 	}
-	/**
-	 *微信朋友圈分享回调修改
-	 *@params key   string 需要改变的参数名 success/cancel/等 如果传入 'clear' 则清空所有的回调参数
-	 *@params value function 对应key的回调函数
-	 *@return eweixin
-	 */
 	eweixin.timelineChangeCallback=function(key,value){
-		if(key==='clear'){
-			empty(timelineCallbacksRecord);
-		}else if(!isUndefined(key)){
-			timelineCallbacksRecord[key]=value;
-		}
-		return this.onMenuShareTimeline(copy({},timelineContentsRecord),copy({},timelineCallbacksRecord));
+		return this.onMenuShareTimeline(changeInfo(TLinfo,callBackNames,key,value));
 	}
 	/**
-	 *腾讯好友分享内容修改
-	 *@params key   string 需要改变的参数名 title/link/imgUrl等 如果传入 'clear' 则清空所有的内容参数
-	 *@params value string 对应key的值
+	 *腾讯好友分享修改
+	 *@params key   	string 		需要改变的参数名  	如果传入 'clear' 则清空所有参数
+	 *@params value 	* 			对应 key 的值		如果传入空值则清空对应的参数
 	 *@return eweixin
 	 */
 	eweixin.qqChangeContent=function(key,value){
-		if(key==='clear'){
-			empty(qqContentsRecord);
-		}else if(!isUndefined(key)){
-			qqContentsRecord[key]=value;
-		}
-		return this.onMenuShareQQ(copy({},qqContentsRecord),copy({},qqCallbacksRecord));
+		return this.onMenuShareQQ(changeInfo(QQinfo,shareKeyNames,key,value));
 	}
-	/**
-	 *腾讯好友分享回调修改
-	 *@params key   string 需要改变的参数名 success/cancel/等 如果传入 'clear' 则清空所有的回调参数
-	 *@params function 对应key的回调函数
-	 *@return eweixin
-	 */
 	eweixin.qqChangeCallback=function(key,value){
-		if(key==='clear'){
-			empty(qqCallbacksRecord);
-		}else if(!isUndefined(key)){
-			qqCallbacksRecord[key]=value;
-		}
-		return this.onMenuShareQQ(copy({},qqContentsRecord),copy({},qqCallbacksRecord));
+		return this.onMenuShareQQ(changeInfo(QQinfo,callBackNames,key,value));
 	}
 	/**
-	 *腾讯微博分享内容修改
-	 *@params key   string 		需要改变的参数名 title|desc|link|imgUrl 如果传入 'clear' 则清空所有腾讯微博的内容参数
-	 *@params value string 		对应key的值
+	 *腾讯微博分享修改
+	 *@params key   	string 		需要改变的参数名  	如果传入 'clear' 则清空所有参数
+	 *@params value 	* 			对应 key 的值		如果传入空值则清空对应的参数
 	 *@return eweixin
 	 */
 	eweixin.weiboChangeContent=function(key,value){
-		if(key==='clear'){
-			empty(weiboContentsRecord);
-		}else if(!isUndefined(key)){
-			weiboContentsRecord[key]=value;
-		}
-		return this.onMenuShareWeibo(copy(null,weiboContentsRecord),copy(null,weiboCallbacksRecord));
+		return this.onMenuShareWeibo(changeInfo(WBinfo,shareKeyNames,key,value));
 	}
-	/**
-	 *腾讯微博分享回调修改
-	 *@params key   	string 		需要改变的参数名参照 callbacks  如果传入 'clear' 则清空所有腾讯微博的回调参数
-	 *@params value 	function 	对应key的回调函数
-	 *@return eweixin
-	 */
 	eweixin.weiboChangeCallback=function(key,value){
-		if(key==='clear'){
-			empty(weiboCallbacksRecord);
-		}else if(!isUndefined(key)){
-			weiboCallbacksRecord[key]=value;
-		}
-		return this.onMenuShareWeibo(copy(null,weiboContentsRecord),copy(null,weiboCallbacksRecord));
+		return this.onMenuShareWeibo(changeInfo(WBinfo,callBackNames,key,value));
 	}
 	/**
-	 *腾讯空间分享内容修改
-	 *@params key   string 		需要改变的参数名 title|desc|link|imgUrl 如果传入 'clear' 则清空所有腾讯微博的内容参数
-	 *@params value string 		对应key的值
+	 *腾讯空间分享修改
+	 *@params key   	string 		需要改变的参数名  	如果传入 'clear' 则清空所有参数
+	 *@params value 	* 			对应 key 的值		如果传入空值则清空对应的参数
 	 *@return eweixin
 	 */
 	eweixin.qzoneChangeContent=function(key,value){
-		if(key==='clear'){
-			empty(weiboContentsRecord);
-		}else if(!isUndefined(key)){
-			weiboContentsRecord[key]=value;
-		}
-		return this.onMenuShareWeibo(copy(null,weiboContentsRecord),copy(null,weiboCallbacksRecord));
+		return this.onMenuShareQZone(changeInfo(QZinfo,shareKeyNames,key,value));
 	}
-	/**
-	 *腾讯空间分享回调修改
-	 *@params key   	string 		需要改变的参数名参照 callbacks  如果传入 'clear' 则清空所有腾讯微博的回调参数
-	 *@params value 	function 	对应key的回调函数
-	 *@return eweixin
-	 */
 	eweixin.qzoneChangeCallback=function(key,value){
-		if(key==='clear'){
-			empty(weiboCallbacksRecord);
-		}else if(!isUndefined(key)){
-			weiboCallbacksRecord[key]=value;
-		}
-		return this.onMenuShareWeibo(copy(null,weiboContentsRecord),copy(null,weiboCallbacksRecord));
+		return this.onMenuShareQZone(changeInfo(QZinfo,callBackNames,key,value));
 	}
 	/**
 	 *统一设置自定义分享
-	 *@params platform      string  	分享平台 (参照 eweinxin.platforms)
+	 *@params platform      string  	分享平台 (参照 eweinxin.platforms) (默认分享所有平台 该参数可以忽略不传递)
 	 *@params args  		object  	分享内容和回调参数
 	 *@return eweixin
 	 */
-	eweixin.setShare=function(platform,contents,callbacks){
-		switch(platform){
+	eweixin.setShare=function(platform,args){
+		var _platform=platform,
+			_start=1;
+		if(!isString(_platform)){
+			_platform='all';
+			_start=0;
+		}
+		var _args=Array.prototype.slice.call(arguments,_start);
+			_args.unshift({});
+			_args=extend.apply(null,_args);
+		
+		switch(_platform){
 			case this.platforms.AM:
-				this.onMenuShareAppMessage(contents,callbacks);
+				this.onMenuShareAppMessage(copy(AMinfo,_args));
 				break;
 			case this.platforms.TL:
-				this.onMenuShareTimeline(contents,callbacks);
+				this.onMenuShareTimeline(copy(TLinfo,_args));
 				break;
 			case this.platforms.QQ:
-				this.onMenuShareQQ(contents,callbacks);
+				this.onMenuShareQQ(copy(QQinfo,_args));
 				break;
 			case this.platforms.WB:
-				this.onMenuShareWeibo(contents,callbacks);
+				this.onMenuShareWeibo(copy(WBinfo,_args));
 				break;
 			case this.platforms.QZ:
-				this.onMenuShareQZone(contents,callbacks);
+				this.onMenuShareQZone(copy(QZinfo,_args));
 				break;
 			default:
-				this.onMenuShareAppMessage(contents,callbacks);
-				this.onMenuShareTimeline(contents,callbacks);
-				this.onMenuShareQQ(contents,callbacks);
-				this.onMenuShareWeibo(contents,callbacks);
-				this.onMenuShareQZone(contents,callbacks);
+				this.onMenuShareAppMessage(copy(AMinfo,_args));
+				this.onMenuShareTimeline(copy(TLinfo,_args));
+				this.onMenuShareQQ(copy(QQinfo,_args));
+				this.onMenuShareWeibo(copy(WBinfo,_args));
+				this.onMenuShareQZone(copy(QZinfo,_args));
 				break;
 		}
 		return this;
 	}
 	/**
-	 *统一修改分享的内容
-	 *@params type   string  	eweixin.TL|eweixin.AM|eweixin.QQ|eweixin.WB|修改对应类型的分享内容  其它情况修改所有的分享内容
-	 *@params key    string 	需要改变的参数名 title|desc|link|imgUrl  如果传入 'clear' 则清空对应类型的所有内容参数
-	 *@params value  string 	对应key的值
+	 *统一修改自定义分享
+	 *@params platform   	string  	分享平台 (参照 eweinxin.platforms)
+	 *@params key   		string 		需要改变的参数名 (如果传入 'clear' 则清空对应类型的所有参数)
+	 *@params value 		* 			对应 key 的值	如果传入空值则清空对应的参数
 	 *@return eweixin
 	 */
-	eweixin.changeContent=function(type,key,value){
-		switch(type){
-			case this.TL:
-				this.timelineChangeContent(key,value);
-				break;
-			case this.AM:
+	eweixin.changeContent=function(platform,key,value){
+		switch(platform){
+			case this.platforms.AM:
 				this.appmessageChangeContent(key,value);
 				break;
-			case this.QQ:
+			case this.platforms.TL:
+				this.timelineChangeContent(key,value);
+				break;
+			case this.platforms.QQ:
 				this.qqChangeContent(key,value);
 				break;
-			case this.WB:
+			case this.platforms.WB:
 				this.weiboChangeContent(key,value);
+				break;
+			case this.platforms.QZ:
+				this.qzoneChangeContent(key,value);
 				break;
 			default:
-				this.timelineChangeContent(key,value);
 				this.appmessageChangeContent(key,value);
+				this.timelineChangeContent(key,value);
 				this.qqChangeContent(key,value);
 				this.weiboChangeContent(key,value);
+				this.qzoneChangeContent(key,value);
 				break;
 		}
 		return this;
 	}
-	/**
-	 *统一修改分享的回调
-	 *@params type   	string  	eweixin.TL|eweixin.AM|eweixin.QQ|eweixin.WB| 修改对应类型的分享回调 其它情况修改所有的分享回调
-	 *@params key   	string 		需要改变的参数名参照 callBackNames  如果传入 'clear' 则清空对应类型的所有回调参数
-	 *@params value 	function 	对应类型key的回调函数
-	 *@return eweixin
-	 */
-	eweixin.changeCallback=function(type,key,value){
-		switch(type){
-			case this.TL:
-				this.timelineChangeCallback(key,value);
-				break;
-			case this.AM:
+	eweixin.changeCallback=function(platform,key,value){
+		switch(platform){
+			case this.platforms.AM:
 				this.appmessageChangeCallback(key,value);
 				break;
-			case this.QQ:
+			case this.platforms.TL:
+				this.timelineChangeCallback(key,value);
+				break;
+			case this.platforms.QQ:
 				this.qqChangeCallback(key,value);
 				break;
-			case this.WB:
+			case this.platforms.WB:
 				this.weiboChangeCallback(key,value);
+				break;
+			case this.platforms.QZ:
+				this.qzoneChangeCallback(key,value);
 				break;
 			default:
-				this.timelineChangeCallback(key,value);
 				this.appmessageChangeCallback(key,value);
+				this.timelineChangeCallback(key,value);
 				this.qqChangeCallback(key,value);
 				this.weiboChangeCallback(key,value);
+				this.qzoneChangeCallback(key,value);
 				break;
 		}
 		return this;
@@ -540,9 +479,9 @@
 			var need=apiList[method];
 			var flag=(need=='config')?eweixin.isConfig:eweixin.isBridge;
 			var group=(need=='config')?waitConfigGroup:waitBridgeGroup;
-			console.log(method+':'+need);
-			console.log('args:',args);
-			console.log('delsame:',delsame);
+			if(method==='onMenuShareTimeline'&&args.desc){
+				args.title=args.desc;
+			}
 			if(flag){
 				method=wx[method];
 				if(isFunction(method)){
@@ -585,18 +524,51 @@
 		});
 	}
 	/**
+	 * 修改参数信息
+	 * @param   	source 		object 			被修改的信息对象 
+	 * @param   	names  		array 			键名称数组
+	 * @param   	key    		string 			修改的键名称
+	 * @param   	value  		*				对应键的值
+	 * @return      source 	
+	 */
+	function changeInfo(source,names,key,value){
+		if(isUndefined(key)||key==='clear'){
+			names.forEach(function(name){
+				delete source[name];
+			});
+		}else{
+			if(!value){
+				delete source[key];
+			}else if(source[key]!=value){
+				source[key]=value;
+			}
+		}
+		return source;
+	}
+	/**
 	 * 把 arguments 第二位开始往后的 object copy 到 dest 对象中 只做第一层对象的浅复制动作 参数越靠后优先级更高（同属性覆盖）
 	 * @param  dest   	object  拷贝目的对象
 	 * @return dest 	
 	 */
 	function copy(dest){
 		empty(dest||(dest={}));
+		var args=Array.prototype.slice.call(arguments,1);
+		args.unshift(dest);
+		return extend.apply(null,args);
+	}
+	/**
+	 * 把 arguments 中的对象属性扩展到 dest 对象中去
+	 * @param  dest   	object  拷贝目的对象
+	 * @return dest 	
+	 */
+	function extend(dest){
+		dest||(dest={});
 		var sources=Array.prototype.slice.call(arguments,1);
 		while(sources.length){
 			var source=sources.shift();
-			if(isObject(source)){
+			if(isObject(source)&&dest!==source){
 				for(var i in source){
-					dest[i]=source[i];
+					if(source.hasOwnProperty(i))dest[i]=source[i];
 				}
 			}
 		}
