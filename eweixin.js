@@ -192,7 +192,6 @@
 		/**
 		 * `wx` 接口包裹处理
 		 * @params args            		object    参数对象
-		 * @params delsame    			boolean   是否把等待数组中的同名方法清除 (默认true)
 		 * @return eweixin         
 		 */
 		eweixin[i]=wrapperMethod(i);
@@ -242,7 +241,6 @@
 	 *判断当前客户端版本是否支持指定JS接口(checkJsApi接口是客户端6.0.2新引入的一个预留接口，第一期开放的接口均可不使用checkJsApi来检测)
 	 *@params args            		object    参数对象
 	 *		      args.jsApiList  	array     需要检测的JS接口列表 (默认所有接口列表)
-	 *@params delsame    			boolean   是否把等待数组中的同名方法清除 (默认true)
 	 *@return eweixin
 	 *
 	 *	```js
@@ -265,7 +263,6 @@
 	 *批量隐藏功能按钮
 	 *@params args            	object 		参数对象
 	 *        	args.menuList   array  		需要隐藏的功能按钮数组 (默认隐藏所有功能按钮)
-	 *@params delsame    		boolean     是否把等待数组中的同名方法清除 (默认true)
 	 *@retrun eweixin
 	 */
 	eweixin.hideMenuItems=wrapperMethod('hideMenuItems',{
@@ -276,7 +273,6 @@
 	 *批量显示功能按钮
 	 *@params args           	object 		参数对象
 	 *        	args.menuList   array  		需要显示的功能按钮数组 (默认显示所有功能按钮)
-	 *@params delsame    		boolean     是否把等待数组中的同名方法清除 (默认true)
 	 *@retrun eweixin
 	 */
 	eweixin.showMenuItems=wrapperMethod('showMenuItems',{
@@ -345,22 +341,13 @@
 	}
 	/**
 	 *统一设置自定义分享
-	 *@params platform      string  	分享平台 (参照 eweinxin.platforms) (默认分享所有平台 该参数可以忽略不传递)
+	 *@params platform      string  	分享平台 (参照 eweinxin.platforms) (该参数可以忽略不传递 则设置所有平台)
 	 *@params args  		object  	分享内容和回调参数
 	 *@return eweixin
 	 */
 	eweixin.setShare=function(platform,args){
-		var _platform=platform,
-			_start=1;
-		if(!isString(_platform)){
-			_platform='all';
-			_start=0;
-		}
-		var _args=Array.prototype.slice.call(arguments,_start);
-			_args.unshift({});
-			_args=extend.apply(null,_args);
-		
-		switch(_platform){
+		var _args=copy.apply(null,[{}].concat(Array.prototype.slice.call(arguments)));
+		switch(platform){
 			case this.platforms.AM:
 				this.onMenuShareAppMessage(copy(AMinfo,_args));
 				break;
@@ -388,7 +375,7 @@
 	}
 	/**
 	 *统一修改自定义分享
-	 *@params platform   	string  	分享平台 (参照 eweinxin.platforms)
+	 *@params platform   	string  	分享平台 (参照 eweinxin.platforms) (该参数可以忽略不传递 则设置所有平台)
 	 *@params key   		string 		需要改变的参数名 (如果传入 'clear' 则清空对应类型的所有参数)
 	 *@params value 		* 			对应 key 的值	如果传入空值则清空对应的参数
 	 *@return eweixin
@@ -411,11 +398,11 @@
 				this.qzoneChangeContent(key,value);
 				break;
 			default:
-				this.appmessageChangeContent(key,value);
-				this.timelineChangeContent(key,value);
-				this.qqChangeContent(key,value);
-				this.weiboChangeContent(key,value);
-				this.qzoneChangeContent(key,value);
+				this.appmessageChangeContent(platform,key);
+				this.timelineChangeContent(platform,key);
+				this.qqChangeContent(platform,key);
+				this.weiboChangeContent(platform,key);
+				this.qzoneChangeContent(platform,key);
 				break;
 		}
 		return this;
@@ -438,11 +425,11 @@
 				this.qzoneChangeCallback(key,value);
 				break;
 			default:
-				this.appmessageChangeCallback(key,value);
-				this.timelineChangeCallback(key,value);
-				this.qqChangeCallback(key,value);
-				this.weiboChangeCallback(key,value);
-				this.qzoneChangeCallback(key,value);
+				this.appmessageChangeCallback(platform,key);
+				this.timelineChangeCallback(platform,key);
+				this.qqChangeCallback(platform,key);
+				this.weiboChangeCallback(platform,key);
+				this.qzoneChangeCallback(platform,key);
 				break;
 		}
 		return this;
@@ -455,26 +442,16 @@
 	function wrapperMethod(method){
 		var defaults=Array.prototype.slice.call(arguments,1);
 		return function(){
-			var currents=defaults.concat(Array.prototype.slice.call(arguments));
-			var argsList=[null];
-			var delsame=true;
-			currents.forEach(function(arg){
-				if(isObject(arg)){
-					argsList.push(arg);
-				}else if(isBoolean(arg)){
-					delsame=arg;
-				}
-			});
-			return waitExecuteMethod(method,copy.apply(null,argsList),delsame);
+			var currents=[{}].concat(defaults,Array.prototype.slice.call(arguments));
+			return waitExecuteMethod(method,copy.apply(null,currents));
 		}
 	}
 	/**
 	*等待执行对应的方法 如果方法对应的 bridge 或 config 要求未满足 将插入等待队列 否则立即执行
 	*@params method  string   wx的方法名称
 	*@params args    object   method的参数
-	*@params delsame boolean  当进入等待队列时是否清除重复的等待接口 有些接口不宜在等待队列出现多次
 	*/
-	function waitExecuteMethod(method,args,delsame){
+	function waitExecuteMethod(method,args){
 		if(isWechat){
 			var need=apiList[method];
 			var flag=(need=='config')?eweixin.isConfig:eweixin.isBridge;
@@ -483,14 +460,10 @@
 				args.title=args.desc;
 			}
 			if(flag){
-				method=wx[method];
-				if(isFunction(method)){
-					method(args);
+				if(isFunction(wx[method])){
+					wx[method](args);
 				}
 			}else{
-				if(isUndefined(delsame)||delsame){
-					delSameInGroup(method,group);
-				}
 				group.push({method:method,args:args});
 			}
 		}
@@ -510,18 +483,6 @@
 				method(args);
 			}
 		}
-	}
-	/**
-	 * 把 group 数组中重复的 method 等待项删除
-	 * @param  method 	string 	  	wx 的方法名称
-	 * @param  group 	array	   	需要操作的等待数组
-	 */
-	function delSameInGroup(method,group){
-		group.forEach(function(item,index,arr){
-			if(item.method===method){
-				arr.splice(index,1);
-			}
-		});
 	}
 	/**
 	 * 修改参数信息
@@ -552,9 +513,7 @@
 	 */
 	function copy(dest){
 		empty(dest||(dest={}));
-		var args=Array.prototype.slice.call(arguments,1);
-		args.unshift(dest);
-		return extend.apply(null,args);
+		return extend.apply(null,[dest].concat(Array.prototype.slice.call(arguments,1)));
 	}
 	/**
 	 * 把 arguments 中的对象属性扩展到 dest 对象中去
