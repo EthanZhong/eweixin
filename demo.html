@@ -47,6 +47,7 @@
 	<button id="changeContent-all">changeContent all platforms</button>
 	<button id="changeContent-tl">changeContent Timeline</button>
 	<button id="changeContent-clear">clear all platforms share content</button>
+	<button id="changeCallback-all">changeCallback all platforms</button>
 
 	<script type="text/javascript">
 		document.querySelector('#getNetworkType').onclick=function(){
@@ -70,6 +71,21 @@
 		    });
 		}
 		document.querySelector('#setShare-all').onclick=function(){
+			/**
+			 *it also work
+			eweixin.setShare({
+				link:'http://mp.weixin.qq.com/wiki/7/aaa137b55fb2e0456bf8dd9148dd613f.html',
+				imgUrl:'http://mp.weixin.qq.com/wiki/static/assets/ac9be2eafdeb95d50b28fa7cd75bb499.png'
+			},{
+				desc:'desc-all'
+			},{
+				title: 'title-all'
+			},{
+				success:function(res){
+					console.log(res);
+				}
+			});
+			*/
 			eweixin.setShare({
 				title: 'title-all',
 				desc:'desc-all',
@@ -94,6 +110,18 @@
 		document.querySelector('#changeContent-clear').onclick=function(){
 			//eweixin.changeContent(eweixin.platforms.TL);//only clear timeline share content
 			eweixin.changeContent();
+		}
+		document.querySelector('#changeCallback-all').onclick=function(){
+			/*
+			*only change timeline callback
+			 eweixin.changeCallback(eweixin.platforms.TL,'success',function(res){
+				alert(res);
+			});
+			*/
+			eweixin.changeCallback('success',function(res){
+				eweixin.changeCallback();//clear all platforms callback
+				alert(res);
+			});
 		}
 	</script>
 </body>
