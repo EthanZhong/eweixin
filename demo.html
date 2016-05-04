@@ -1,42 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<meta name="viewport" content="width=640,target-densitydpi=device-dpi,user-scalable=no" />
 	<title>Demo</title>
+	<style type="text/css">
+		html, body {
+		  margin: 0;
+		  padding: 0;
+		  border: 0;
+		  width: 100%;
+		  height: 100%; 
+		}
+		body {
+		  -webkit-text-size-adjust: 100%;
+		  -webkit-font-smoothing: antialiased;
+		  -webkit-user-select: none;
+		  -moz-user-select: none; 
+		}
+		ul, ol, li, dl, dt, dd, p, img, div, span, input, textarea, tr, td, th, select {
+		  padding: 0;
+		  margin: 0;
+		  border: 0; 
+		}
+		ul, ol, li {
+		  list-style: none; 
+		}
+		button{
+			font-size: 1.5rem;
+			display: block;
+			width: 80%;
+			height: 60px;
+			margin: 10px auto;
+			text-align: center;
+		}
+	</style>
 	<script type="text/javascript" src="bower_components/jweixin/jweixin-1.0.0.js"></script>
 	<script type="text/javascript" src="eweixin.js"></script>
 </head>
 <body>
-	<button id="scanQRCode">scanQRCode</button>
+	<button id="getNetworkType">getNetworkType</button>
 	<button id="openProductSpecificView">openProductSpecificView</button>
-	<button id="openLocation">openLocation</button>
-	<button id="getLocation">getLocation</button>
 	<button id="previewImage">previewImage</button>
-	<button id="chooseImage">chooseImage</button>
+	<button id="setShare-all">setShare all platforms</button>
+	<button id="setShare-am">setShare AppMessage</button>
+	<button id="changeContent-all">changeContent all platforms</button>
+	<button id="changeContent-tl">changeContent Timeline</button>
+	<button id="changeContent-clear">clear all platforms share content</button>
+
 	<script type="text/javascript">
-		eweixin.setShare({title:'test',desc:'desc'},{name:2},{desc:'1111111111'})
-		//eweixin.closeWindow()
-		document.querySelector('#scanQRCode').onclick=function(){
-			eweixin.scanQRCode();
+		document.querySelector('#getNetworkType').onclick=function(){
+			eweixin.getNetworkType({ 
+				success:function(res){
+		        	alert(res.networkType); // 返回网络类型2g，3g，4g，wifi
+		    	}
+			});
 		}
 		document.querySelector('#openProductSpecificView').onclick=function(){
 			eweixin.openProductSpecificView({productId: 'pDF3iY_m2M7EQ5EKKKWd95kAxfNw'});
 		}
-		document.querySelector('#openLocation').onclick=function(){
-			eweixin.openLocation({
-			   	latitude: 23.099994,
-			   	longitude: 113.324520,
-			   	name: 'TIT 创意园',
-			   	address: '广州市海珠区新港中路 397 号',
-			   	scale: 14,
-			   	infoUrl: 'http://weixin.qq.com'
-		    });
-		}
-		document.querySelector('#getLocation').onclick=function(){
-			eweixin.getLocation();
-		}
-		document.querySelector('#previewImage').onclick = function () {
+		document.querySelector('#previewImage').onclick=function(){
 		    eweixin.previewImage({
 			    current: 'http://img5.douban.com/view/photo/photo/public/p1353993776.jpg',
 			    urls: [
@@ -45,9 +68,32 @@
 			        'http://img3.douban.com/view/photo/photo/public/p2152134700.jpg'
 			    ]
 		    });
-		};
-		document.querySelector('#chooseImage').onclick=function(){
-			eweixin.chooseImage({count:2});
+		}
+		document.querySelector('#setShare-all').onclick=function(){
+			eweixin.setShare({
+				title: 'title-all',
+				desc:'desc-all',
+				link:'http://mp.weixin.qq.com/wiki/7/aaa137b55fb2e0456bf8dd9148dd613f.html',
+				imgUrl:'http://mp.weixin.qq.com/wiki/static/assets/ac9be2eafdeb95d50b28fa7cd75bb499.png'
+			});
+		}
+		document.querySelector('#setShare-am').onclick=function(){
+			eweixin.setShare(eweixin.platforms.AM,{
+				title: 'title-am',
+				desc:'desc-am',
+				link:'http://mp.weixin.qq.com/wiki/7/aaa137b55fb2e0456bf8dd9148dd613f.html',
+				imgUrl:'http://mp.weixin.qq.com/wiki/static/assets/ac9be2eafdeb95d50b28fa7cd75bb499.png'
+			});
+		}
+		document.querySelector('#changeContent-all').onclick=function(){
+			eweixin.changeContent('desc','change-desc-all').changeContent('title','change-title-all')
+		}
+		document.querySelector('#changeContent-tl').onclick=function(){
+			eweixin.changeContent(eweixin.platforms.TL,'desc','change-desc-tl');
+		}
+		document.querySelector('#changeContent-clear').onclick=function(){
+			//eweixin.changeContent(eweixin.platforms.TL);//only clear timeline share content
+			eweixin.changeContent();
 		}
 	</script>
 </body>

@@ -7,13 +7,6 @@
     "jweixin",
     "eweixin"
   ],
-  "authors":[
-    {"name":"Ethan Zhong","email":"zhongdings@163.com"},
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/EthanZhong/eweixin.git"
-  },
   "ignore": [
     "bower_components",
     "*.html"

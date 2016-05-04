@@ -231,8 +231,8 @@
 			});
 			/*填充默认属性 调用 wx.config 进行验证*/
 			var cfApiList=configs.jsApiList;
-			configs.debug=(isUndefined(configs.debug))?false:configs.debug;
 			configs.jsApiList=(isArray(cfApiList)&&!isEmptyArray(cfApiList))?cfApiList:apiNams;
+			configs.debug=(isUndefined(configs.debug))?false:configs.debug;
 			wx.config(configs);
 		}
 		return this;
@@ -486,8 +486,8 @@
 	}
 	/**
 	 * 包装 `wx` 的接口方法 
-	 * @param  {string} 	method  	`wx` 		的接口名称
-	 * @return {function}        		`eweixin` 	的对应的接口
+	 * @param  {string} 	method  	`wx`的接口名称
+	 * @return {function}        		`eweixin`的对应的接口
 	 */
 	function wrapperMethod(method){
 		var defaults=Array.prototype.slice.call(arguments,1);
@@ -542,12 +542,16 @@
 	function changeInfo(source,names,key,value){
 		if(isUndefined(key)||key==='clear'){
 			names.forEach(function(name){
-				delete source[name];
+				if(source.hasOwnProperty(name)){
+					delete source[name];
+				}
 			});
 		}else{
 			if(!value){
-				delete source[key];
-			}else if(source[key]!=value){
+				if(source.hasOwnProperty(key)){
+					delete source[key];
+				}
+			}else if(source[key]!==value){
 				source[key]=value;
 			}
 		}
