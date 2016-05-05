@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
 	<meta name="viewport" content="width=640,target-densitydpi=device-dpi,user-scalable=no" />
-	<title>Demo</title>
+	<title>eweixin</title>
 	<style type="text/css">
 		html, body {
 		  margin: 0;
@@ -35,8 +35,8 @@
 			text-align: center;
 		}
 	</style>
-	<script type="text/javascript" src="bower_components/jweixin/jweixin-1.0.0.js"></script>
-	<script type="text/javascript" src="eweixin.js"></script>
+	<script type="text/javascript" src="../bower_components/jweixin/jweixin-1.0.0.js"></script>
+	<script type="text/javascript" src="../eweixin.js"></script>
 </head>
 <body>
 	<button id="getNetworkType">getNetworkType</button>
@@ -50,6 +50,38 @@
 	<button id="changeCallback-all">changeCallback all platforms</button>
 
 	<script type="text/javascript">
+		/*wx.ready(function(){
+			wx.getNetworkType({
+				success:function(res){
+					alert(res.networkType);
+				}
+			});
+		})
+		wx.config({})*/
+		/*wx.getNetworkType({
+			success:function(res){
+				alert(res.networkType);
+			}
+		});*/
+		/*var delay=window.setInterval(function(){
+			if(window.WeixinJSBridge){
+				window.clearInterval(delay);
+				wx.getNetworkType({
+					success:function(res){
+						alert(res.networkType);
+					}
+				});
+			}
+		},50);*/
+		eweixin.getNetworkType({
+			success:function(res){
+				alert(res.networkType);
+			}
+		});
+
+
+
+		
 		document.querySelector('#getNetworkType').onclick=function(){
 			eweixin.getNetworkType({ 
 				success:function(res){
@@ -108,7 +140,12 @@
 			eweixin.changeContent(eweixin.platforms.TL,'desc','change-desc-tl');
 		}
 		document.querySelector('#changeContent-clear').onclick=function(){
-			//eweixin.changeContent(eweixin.platforms.TL);//only clear timeline share content
+			//only clear timeline share content
+			//eweixin.changeContent(eweixin.platforms.TL,'clear');
+			//eweixin.changeContent(eweixin.platforms.TL);
+			
+			//clear all platforms share content
+			//eweixin.changeContent('clear');
 			eweixin.changeContent();
 		}
 		document.querySelector('#changeCallback-all').onclick=function(){
@@ -119,8 +156,10 @@
 			});
 			*/
 			eweixin.changeCallback('success',function(res){
-				eweixin.changeCallback();//clear all platforms callback
-				alert(res);
+				//do something
+				
+				//clear all platforms callback
+				eweixin.changeCallback();
 			});
 		}
 	</script>

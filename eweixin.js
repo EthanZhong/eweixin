@@ -238,7 +238,7 @@
 		return this;
 	}
 	/**
-	 *判断当前客户端版本是否支持指定JS接口(checkJsApi接口是客户端6.0.2新引入的一个预留接口，第一期开放的接口均可不使用checkJsApi来检测)
+	 *判断当前客户端版本是否支持指定JS接口(checkJsApi接口是客户端6.0.2新引入的一个预留接口，第一期开放的接口均可不使用checkJsApi来检测)(覆盖默认)
 	 *@params args            		object    参数对象
 	 *		      args.jsApiList  	array     需要检测的JS接口列表 (默认所有接口列表)
 	 *@return eweixin
@@ -260,7 +260,7 @@
 		success:function(res){}
 	});
 	/**
-	 *批量隐藏功能按钮
+	 *批量隐藏功能按钮(覆盖默认)
 	 *@params args            	object 		参数对象
 	 *        	args.menuList   array  		需要隐藏的功能按钮数组 (默认隐藏所有功能按钮)
 	 *@retrun eweixin
@@ -270,7 +270,7 @@
 		success:function(res){}
 	});
 	/**
-	 *批量显示功能按钮
+	 *批量显示功能按钮(覆盖默认)
 	 *@params args           	object 		参数对象
 	 *        	args.menuList   array  		需要显示的功能按钮数组 (默认显示所有功能按钮)
 	 *@retrun eweixin
@@ -280,7 +280,7 @@
 		success:function(res){}
 	});
 	/**
-	 * 微信好友分享
+	 * 微信好友分享(覆盖默认)
 	 * @params args 		object 			参数对象 (参考 shareKeyNames 和 callBackNames)
 	 * @return eweixin
 	 */
@@ -301,7 +301,7 @@
 		return this.onMenuShareAppMessage(changeInfo(AMinfo,callBackNames,key,value));
 	}
 	/**
-	 * 微信朋友圈分享
+	 * 微信朋友圈分享(覆盖默认)
 	 * @params args 		object 			参数对象 (参考 shareKeyNames 和 callBackNames)
 	 * @return eweixin
 	 */
@@ -325,7 +325,7 @@
 		return this.onMenuShareTimeline(changeInfo(TLinfo,callBackNames,key,value));
 	}
 	/**
-	 * 腾讯好友分享
+	 * 腾讯好友分享(覆盖默认)
 	 * @params args 		object 			参数对象 (参考 shareKeyNames 和 callBackNames)
 	 * @return eweixin
 	 */
@@ -346,7 +346,7 @@
 		return this.onMenuShareQQ(changeInfo(QQinfo,callBackNames,key,value));
 	}
 	/**
-	 * 腾讯微博分享
+	 * 腾讯微博分享(覆盖默认)
 	 * @params args 		object 			参数对象 (参考 shareKeyNames 和 callBackNames)
 	 * @return eweixin
 	 */
@@ -367,7 +367,7 @@
 		return this.onMenuShareWeibo(changeInfo(WBinfo,callBackNames,key,value));
 	}
 	/**
-	 * 腾讯空间分享
+	 * 腾讯空间分享(覆盖默认)
 	 * @params args 		object 			参数对象 (参考 shareKeyNames 和 callBackNames)
 	 * @return eweixin
 	 */
@@ -492,8 +492,7 @@
 	function wrapperMethod(method){
 		var defaults=Array.prototype.slice.call(arguments,1);
 		return function(){
-			var currents=[null].concat(defaults,Array.prototype.slice.call(arguments));
-			return waitExecuteMethod(method,copy.apply(null,currents));
+			return waitExecuteMethod(method,copy.apply(null,[null].concat(defaults,Array.prototype.slice.call(arguments))));
 		}
 	}
 	/**
@@ -504,7 +503,7 @@
 	function waitExecuteMethod(method,args){
 		if(isWechat){
 			var need=apiList[method];
-			var flag=(need=='config')?eweixin.isConfig:eweixin.isBridge;
+			var flag=(need=='config')?hasConfig:eweixin.isBridge;
 			var group=(need=='config')?waitConfigGroup:waitBridgeGroup;
 			if(flag){
 				if(isFunction(wx[method])){

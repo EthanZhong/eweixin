@@ -1,6 +1,6 @@
 {
   "name": "eweixin",
-  "description": "wechat api wrapper",
+  "description": "wechat's api wrapper",
   "main": "eweixin.js",
   "keywords":[
     "wechat",
@@ -9,7 +9,7 @@
   ],
   "ignore": [
     "bower_components",
-    "*.html"
+    "example"
   ],
   "dependencies": {
     "jweixin": "https://github.com/EthanZhong/jweixin.git#1.0.0"
