@@ -562,8 +562,23 @@
 	 * @return dest 	
 	 */
 	function copy(dest){
-		dest||(dest={});
-		return (arguments.length<2)?dest:extend.apply(null,[empty(dest)].concat(Array.prototype.slice.call(arguments,1)));
+		var needEmpty=true;
+		var sources;
+		var args=Array.prototype.slice.call(arguments,1);
+		if(!isObject(dest))dest={};
+		if(args.length){
+			sources=args.filter(function(item){
+				var sameDest=(item===dest);
+				if(sameDest){
+					needEmpty=false;
+				}
+				return !sameDest
+			});
+			sources.unshift((needEmpty)?empty(dest):dest);
+			return extend.apply(null,sources);
+		}else{
+			return dest;
+		}
 	}
 	/**
 	 * 把 arguments 中的对象属性扩展到 dest 对象中去
@@ -572,7 +587,7 @@
 	 */
 	function extend(dest){
 		if(arguments.length>1){
-			dest||(dest={});
+			if(!isObject(dest))dest={};
 			var args=Array.prototype.slice.call(arguments,1);
 			args.reduce(function(prev,current){
 				if(isObject(current)&&prev!==current){
