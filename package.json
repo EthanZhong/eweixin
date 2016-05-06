@@ -1,0 +1,24 @@
+{
+  "name": "eweixin",
+  "version": "1.0.0",
+  "description": "wechat's api wrapper",
+  "main": "eweixin.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EthanZhong/eweixin.git"
+  },
+  "keywords": [
+    "wechat",
+    "jweixin",
+    "eweixin"
+  ],
+  "author": "EthanZhong <zhongdings@163.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EthanZhong/eweixin/issues"
+  },
+  "homepage": "https://github.com/EthanZhong/eweixin#readme",
+  "dependencies": {
+    "jweixin": "git+https://github.com/EthanZhong/jweixin.git#1.0.0"
+  }
+}
