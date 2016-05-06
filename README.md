@@ -203,7 +203,7 @@ eweixin.setShare({
 });
 ```
 
-		example/index.html 中有一些接口使用范例
+		example/index.html 中有一些接口使用范例(由于是本地环境并没有签名信息可用，所以请模拟 qq 域名测试)
 
 
 ## 写在最后
