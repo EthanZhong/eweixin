@@ -50,38 +50,6 @@
 	<button id="changeCallback-all">changeCallback all platforms</button>
 
 	<script type="text/javascript">
-		/*wx.ready(function(){
-			wx.getNetworkType({
-				success:function(res){
-					alert(res.networkType);
-				}
-			});
-		})
-		wx.config({})*/
-		/*wx.getNetworkType({
-			success:function(res){
-				alert(res.networkType);
-			}
-		});*/
-		/*var delay=window.setInterval(function(){
-			if(window.WeixinJSBridge){
-				window.clearInterval(delay);
-				wx.getNetworkType({
-					success:function(res){
-						alert(res.networkType);
-					}
-				});
-			}
-		},50);*/
-		eweixin.getNetworkType({
-			success:function(res){
-				alert(res.networkType);
-			}
-		});
-
-
-
-		
 		document.querySelector('#getNetworkType').onclick=function(){
 			eweixin.getNetworkType({ 
 				success:function(res){
