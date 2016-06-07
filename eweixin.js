@@ -225,7 +225,7 @@
 				/*if(msg.errMsg==='config:ok')*/
 				if(!isError){
 					hasConfig=true;
-					executeGroup('confing');
+					executeGroup('config');
 					isFunction(success)&&success(msg);
 				}
 			});

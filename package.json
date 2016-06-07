@@ -1,6 +1,6 @@
 {
   "name": "eweixin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "wechat's api wrapper",
   "main": "eweixin.js",
   "repository": {
